@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Milestones - Spotlight Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020000;
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .cinematic-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glass-card {
+            background: rgba(20, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 50, 50, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+            transition: border 0.4s ease;
+        }
+
+        .red-glow-text {
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.6), 0 0 30px rgba(255, 0, 0, 0.3);
+        }
+
+        .title-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            letter-spacing: 0.2em;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 0, 0, 0.15);
+            position: absolute;
+            z-index: 50;
+            pointer-events: none;
+            animation: scan 6s linear infinite;
+        }
+
+        @keyframes scan {
+            from { top: -10%; }
+            to { top: 110%; }
+        }
+
+        .node-pulse {
+            animation: nodeGlow 2s infinite alternate;
+        }
+
+        @keyframes nodeGlow {
+            from { filter: drop-shadow(0 0 2px rgba(255,0,0,0.5)); }
+            to { filter: drop-shadow(0 0 8px rgba(255,0,0,1)); }
+        }
+
+        #spotlight-reveal {
+            display: none;
+            background: radial-gradient(circle at center, rgba(40, 0, 0, 0.4) 0%, rgba(0,0,0,0.95) 100%);
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #fff 0%, #ff4444 50%, #fff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 4s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div class="cinematic-overlay"></div>
+    <div class="scanline"></div>
+
+    <main class="relative z-10 w-full h-full flex flex-col items-center justify-center p-6 overflow-hidden">
+        
+        <!-- 0-4s: Opening Title Spotlight -->
+        <div id="intro-title-container" class="absolute flex flex-col items-center">
+            <h1 class="title-reveal text-4xl md:text-5xl font-black uppercase text-center red-glow-text">
+                Admin 2025 Milestones <br> & Goals Unlocked
+            </h1>
+            <div id="intro-pulse" class="w-24 h-[1px] bg-red-600 mt-6 opacity-0 scale-x-0"></div>
+        </div>
+
+        <!-- 4-20s: Milestone Grid -->
+        <div id="milestone-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl w-full hidden">
+            
+            <!-- 1: Budgeting -->
+            <div class="glass-card p-5 rounded-lg" id="m1">
+                <h3 class="text-xs font-black text-red-500 uppercase tracking-widest mb-3">01 // Budgeting</h3>
+                <h4 class="text-md font-bold mb-3">Smarter Event Budgeting</h4>
+                <div class="flex items-center gap-6">
+                    <div class="relative w-16 h-16">
+                        <svg class="w-full h-full" viewBox="0 0 36 36">
+                            <path class="text-white/10" stroke-width="2.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="ring1" class="text-red-600" stroke-dasharray="0, 100" stroke-width="2.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-red-400">25.5%</div>
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full bg-red-600 w-[40%]"></div>
+                        </div>
+                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full bg-red-400 w-[25.5%]"></div>
+                        </div>
+                        <p class="text-[9px] text-gray-400 uppercase tracking-tighter">Cost vs. Quality Optimized</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2: Collaboration -->
+            <div class="glass-card p-5 rounded-lg" id="m2">
+                <h3 class="text-xs font-black text-red-500 uppercase tracking-widest mb-3">02 // Synergy</h3>
+                <h4 class="text-md font-bold mb-3">Cross-Team Collaboration</h4>
+                <div class="relative h-16 w-full flex items-center justify-center" id="node-container">
+                    <svg width="100%" height="100%" viewBox="0 0 200 60" class="overflow-visible">
+                        <path id="conn-line" d="M20,30 L180,30" stroke="rgba(255,0,0,0.2)" stroke-width="1" fill="none"/>
+                        <circle class="node-pulse" cx="20" cy="30" r="3" fill="#ff0000" />
+                        <circle class="node-pulse" cx="60" cy="20" r="3" fill="#ff0000" />
+                        <circle class="node-pulse" cx="100" cy="40" r="3" fill="#ff0000" />
+                        <circle class="node-pulse" cx="140" cy="20" r="3" fill="#ff0000" />
+                        <circle class="node-pulse" cx="180" cy="30" r="3" fill="#ff0000" />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+                        <span class="text-[8px] font-mono">FIN • HR • IT • ADMIN • LEGAL</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3: Supplier -->
+            <div class="glass-card p-5 rounded-lg" id="m3">
+                <h3 class="text-xs font-black text-red-500 uppercase tracking-widest mb-3">03 // Logistics</h3>
+                <h4 class="text-md font-bold mb-3">Expanded Supplier Network</h4>
+                <div class="flex flex-col gap-3">
+                    <div class="flex justify-between items-end">
+                        <svg class="w-12 h-12 text-red-500/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                        <div class="text-right">
+                            <div class="text-[10px] text-gray-500">DEPENDENCY</div>
+                            <div class="text-xl font-black text-red-500">-45%</div>
+                        </div>
+                    </div>
+                    <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div id="bar3" class="h-full bg-red-600" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4: Workflows -->
+            <div class="glass-card p-5 rounded-lg" id="m4">
+                <h3 class="text-xs font-black text-red-500 uppercase tracking-widest mb-3">04 // Process</h3>
+                <h4 class="text-md font-bold mb-3">Streamlined Workflows</h4>
+                <div class="h-16 w-full flex items-center">
+                    <svg width="100%" height="40" viewBox="0 0 200 40">
+                        <path d="M0,35 L20,5 L40,30 L60,10 L80,38 L100,20" stroke="rgba(255,255,255,0.1)" fill="none" stroke-width="1" />
+                        <path id="workflow-path" d="M0,20 Q50,20 100,20 T200,20" stroke="#ff4444" fill="none" stroke-width="2" stroke-dasharray="200" stroke-dashoffset="200" />
+                    </svg>
+                </div>
+                <div class="text-[9px] text-red-500 font-bold mt-2">OPTIMIZED FLOW REACHED</div>
+            </div>
+
+            <!-- 5: Efficiency -->
+            <div class="glass-card p-5 rounded-lg" id="m5">
+                <h3 class="text-xs font-black text-red-500 uppercase tracking-widest mb-3">05 // Performance</h3>
+                <h4 class="text-md font-bold mb-3">Operational Efficiency</h4>
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-red-950 rounded border border-red-500/30">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-gray-500 mb-1">STABILITY LEVEL</div>
+                        <div class="w-full h-2 bg-black/40 rounded-sm">
+                            <div id="meter5" class="h-full bg-red-600" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6: Warehouse -->
+            <div class="glass-card p-5 rounded-lg" id="m6">
+                <h3 class="text-xs font-black text-red-500 uppercase tracking-widest mb-3">06 // Asset Control</h3>
+                <h4 class="text-md font-bold mb-3">Warehouse Management</h4>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <div class="bg-red-900/10 border border-red-900/30 p-2 text-center">
+                        <div class="text-[8px] text-gray-500">ACCURACY</div>
+                        <div class="text-xs font-bold text-red-400">99.8%</div>
+                    </div>
+                    <div class="bg-red-900/10 border border-red-900/30 p-2 text-center">
+                        <div class="text-[8px] text-gray-500">UTILIZATION</div>
+                        <div class="text-xs font-bold text-red-400">84.2%</div>
+                    </div>
+                </div>
+                <div class="mt-3 text-[8px] font-mono text-red-900 flex items-center gap-2">
+                    <div class="w-1 h-1 bg-red-600 animate-pulse"></div> SCANNING ASSETS...
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 20-30s: Dramatic Spotlight Moment -->
+        <div id="spotlight-reveal" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-10">
+            <div id="spotlight-content" class="text-center opacity-0 scale-90">
+                <div class="mb-8 relative inline-block">
+                    <div class="absolute inset-0 bg-red-600 blur-3xl opacity-20 animate-pulse"></div>
+                    <h2 class="text-5xl md:text-7xl font-black uppercase tracking-tighter shimmer-text">
+                        Completely Staffed & <br> Stronger Admin Team
+                    </h2>
+                </div>
+                
+                <div class="space-y-4 max-w-2xl mx-auto">
+                    <p id="subtext" class="text-xl md:text-2xl font-light text-red-100/80 tracking-widest opacity-0">
+                        Greater Capacity. Greater Resilience. Greater Impact.
+                    </p>
+                    <div class="flex justify-center gap-4 mt-8 opacity-0" id="final-badges">
+                        <span class="px-6 py-2 border border-red-500 text-red-500 text-xs font-black uppercase tracking-widest rounded-full">Mission Accomplished</span>
+                        <span class="px-6 py-2 bg-red-600 text-white text-xs font-black uppercase tracking-widest rounded-full">Ready for 2026</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let scene, camera, renderer, particles, core;
+        const PARTICLE_COUNT = 2000;
+
+        function initThree() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(PARTICLE_COUNT * 3);
+            for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 12;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                color: 0xff3333,
+                size: 0.02,
+                transparent: true,
+                opacity: 0.5,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            const coreGeom = new THREE.IcosahedronGeometry(2, 2);
+            const coreMat = new THREE.MeshBasicMaterial({ color: 0x220000, wireframe: true, transparent: true, opacity: 0.2 });
+            core = new THREE.Mesh(coreGeom, coreMat);
+            scene.add(core);
+
+            camera.position.z = 5;
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.y += 0.0008;
+            core.rotation.y -= 0.002;
+            renderer.render(scene, camera);
+        }
+
+        function runPresentation() {
+            const tl = gsap.timeline();
+
+            tl.to(".title-reveal", { opacity: 1, y: 0, duration: 1.5, ease: "power3.out", stagger: 0.3 });
+            tl.to("#intro-pulse", { opacity: 0.6, scaleX: 1, duration: 1, ease: "expo.out" }, "-=0.5");
+            tl.to("#intro-title-container", { y: -250, scale: 0.7, duration: 1.5, ease: "power4.inOut", delay: 1 });
+            
+            tl.set("#milestone-grid", { display: "grid" });
+            tl.to(".glass-card", { 
+                opacity: 1, 
+                scale: 1, 
+                y: 0, 
+                duration: 0.8, 
+                stagger: 0.2, 
+                ease: "back.out(1.7)",
+                onStart: () => {
+                    gsap.to("#ring1", { strokeDasharray: "25, 100", duration: 2, delay: 0.5 });
+                    gsap.to("#bar3", { width: "100%", duration: 3, delay: 1 });
+                    gsap.to("#workflow-path", { strokeDashoffset: 0, duration: 2, delay: 1.5 });
+                    gsap.to("#meter5", { width: "95%", duration: 2.5, delay: 2 });
+                }
+            });
+
+            tl.addLabel("shift", 18);
+            tl.to(".glass-card", { opacity: 0.05, filter: "blur(5px)", duration: 1, ease: "power2.inOut" }, "shift");
+            tl.to("#intro-title-container", { opacity: 0, duration: 1 }, "shift");
+            tl.set("#spotlight-reveal", { display: "flex" }, "shift+=0.5");
+            
+            tl.to("#spotlight-content", { opacity: 1, scale: 1.1, duration: 2, ease: "power4.out" });
+            tl.to("#subtext", { opacity: 1, y: -10, duration: 1.5 }, "-=0.5");
+            tl.to("#final-badges", { opacity: 1, y: -20, duration: 1 }, "-=0.5");
+
+            tl.to(camera.position, { z: 4, duration: 5, ease: "power1.inOut" }, "shift");
+        }
+
+        window.onload = () => {
+            initThree();
+            runPresentation();
+        };
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

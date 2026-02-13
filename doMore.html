@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin 2025 Reflection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: black; color: white; margin: 0; overflow: hidden; }
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body x-data="reflectionSystem()" x-init="startTimer()">
+
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="relative transition-all duration-1000" :class="phase === 'SYNTHESIS' ? 'scale-150' : 'scale-100'">
+            <div class="absolute inset-0 bg-red-600 rounded-full blur-[120px] opacity-20 animate-pulse"></div>
+            <div class="w-64 h-64 border border-red-900/30 rounded-full flex items-center justify-center animate-[spin_20s_linear_infinite]">
+                <div class="w-48 h-48 border border-red-500/20 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
+            </div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-red-600 rounded-full shadow-[0_0_50px_#dc2626] z-10">
+                <div class="absolute inset-0 bg-white rounded-full opacity-40 animate-ping"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+
+    <div class="relative z-20 h-screen flex flex-col p-8 lg:p-12">
+        
+        <header class="flex justify-between items-start mb-8">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
+                    <span class="text-[10px] tracking-[0.3em] text-red-500 font-bold uppercase">System Active: Admin_2025_REFL</span>
+                </div>
+                <h1 class="text-3xl font-black tracking-tighter">ADMIN 2025 <span class="text-red-600">REFLECTION</span></h1>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] tracking-[0.2em] text-gray-500 mb-1 uppercase">Phase Progress</div>
+                <div class="w-48 h-1 bg-gray-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-red-600 transition-all duration-100" :style="`width: ${(timer / 45) * 100}%` "></div>
+                </div>
+                <div class="text-[10px] text-gray-600 mt-1 font-mono" x-text="timer.toFixed(1) + 's / 45.0s'"></div>
+            </div>
+        </header>
+
+        <main class="flex-1 flex items-center justify-center">
+            
+            <template x-if="phase === 'INTRO'">
+                <div class="flex gap-12">
+                    <div class="text-5xl font-black tracking-tighter fade-in" style="text-shadow: 0 0 20px rgba(220, 38, 38, 0.4)">DID MORE</div>
+                    <div class="text-5xl font-black tracking-tighter fade-in" style="animation-delay: 0.5s; text-shadow: 0 0 20px rgba(220, 38, 38, 0.4)">DID BETTER</div>
+                    <div class="text-5xl font-black tracking-tighter fade-in" style="animation-delay: 1s; text-shadow: 0 0 20px rgba(220, 38, 38, 0.4)">DID LESS</div>
+                </div>
+            </template>
+
+            <template x-if="phase === 'MORE'">
+                <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-12 items-center fade-in">
+                    <div class="space-y-6">
+                        <h2 class="text-4xl font-black italic tracking-tighter text-red-500">DID MORE</h2>
+                        <div>
+                            <h3 class="text-sm font-bold tracking-widest text-gray-300 uppercase mb-4">Interdepartmental Coordination</h3>
+                            <div class="relative h-32 bg-gray-900/40 rounded-xl border border-white/5 p-4 overflow-hidden">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i data-lucide="network" class="w-12 h-12 text-red-600 transition-all duration-1000" :class="progress > 0.2 ? 'scale-125 opacity-100' : 'scale-75 opacity-20'"></i>
+                                </div>
+                                <svg class="absolute bottom-0 left-0 w-full h-12 overflow-visible">
+                                    <path :d="`M 0 40 Q 50 ${40 - progress * 30}, 100 ${40 - progress * 35} L 300 10`" fill="none" stroke="#dc2626" stroke-width="2" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center p-8 bg-white/5 rounded-2xl border border-white/10 h-[300px]">
+                        <i data-lucide="globe" class="w-20 h-20 text-red-600 transition-all duration-1000" :class="progress > 0.4 ? 'rotate-180 scale-110' : ''"></i>
+                        <div class="mt-8 text-center">
+                            <div class="text-2xl font-black" x-text="'+' + Math.round(progress * 45) + '%'"></div>
+                            <div class="text-[10px] text-gray-500 uppercase">Productivity Surge</div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-red-600/10 rounded-xl border border-red-500/20">
+                        <h3 class="text-sm font-bold text-red-500 mb-4">EXPANDED AI</h3>
+                        <div class="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-red-500 transition-all" :style="`width: ${progress * 88}%` "></div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="phase === 'BETTER'">
+                <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 fade-in">
+                    <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                        <h2 class="text-2xl font-black text-red-500 mb-4">DID BETTER</h2>
+                        <div class="space-y-4">
+                            <template x-for="skill in skills">
+                                <div>
+                                    <div class="flex justify-between text-[10px] mb-1">
+                                        <span x-text="skill.label"></span>
+                                        <span class="text-red-500" x-text="Math.round(progress * skill.val) + '%'"></span>
+                                    </div>
+                                    <div class="h-1 bg-gray-900 rounded-full overflow-hidden">
+                                        <div class="h-full bg-red-600" :style="`width: ${progress * skill.val}%` "></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                        <h3 class="text-xs font-bold text-gray-400 mb-4 uppercase">Systematized Warehouse</h3>
+                        <div class="grid grid-cols-5 gap-2">
+                            <template x-for="i in 20">
+                                <div class="h-6 rounded-sm transition-all duration-500" :class="progress > (i/20) ? 'bg-red-600/60' : 'bg-gray-800'"></div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="bg-red-600/10 rounded-2xl p-6 border border-red-500/20">
+                        <h3 class="text-xs font-bold text-red-500 mb-2 uppercase">Cost Management</h3>
+                        <div class="text-3xl font-black text-green-500" x-text="'+' + Math.round(progress * 18) + '%'"></div>
+                        <div class="text-[10px] text-gray-500">Efficiency Optimized</div>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="phase === 'LESS'">
+                <div class="w-full max-w-5xl fade-in text-center">
+                    <h2 class="text-4xl font-black italic text-red-500/80 mb-12">DID LESS</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                        <div class="bg-black border border-white/5 p-6 rounded-2xl">
+                            <i data-lucide="shield-alert" class="text-red-600 mb-4"></i>
+                            <div class="text-xl font-black" x-text="Math.round(100 - progress * 92) + '%'"></div>
+                            <div class="text-gray-500 text-[10px]">Rush Alerts</div>
+                        </div>
+                        <div class="bg-black border border-white/5 p-6 rounded-2xl">
+                            <i data-lucide="zap" class="text-red-500 mb-4"></i>
+                            <div class="text-xl font-black text-white" x-text="Math.round(80 - progress * 75) + '%'"></div>
+                            <div class="text-gray-500 text-[10px]">Manual Load</div>
+                        </div>
+                        <div class="bg-black border border-white/5 p-6 rounded-2xl">
+                            <i data-lucide="bar-chart-3" class="text-red-400 mb-4"></i>
+                            <div class="text-xl font-black text-green-500">STABLE</div>
+                            <div class="text-gray-500 text-[10px]">Volatility Index</div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="phase === 'SYNTHESIS'">
+                <div class="text-center space-y-12 fade-in">
+                    <div class="text-2xl font-bold tracking-[0.4em] text-red-500 uppercase">Reflection Complete</div>
+                    <div class="text-5xl font-black tracking-tight flex items-center justify-center gap-6">
+                        <span>SMARTER</span>
+                        <span class="w-3 h-3 bg-red-600 rounded-full"></span>
+                        <span>STRONGER</span>
+                        <span class="w-3 h-3 bg-red-600 rounded-full"></span>
+                        <span>SIMPLER</span>
+                    </div>
+                    <button onclick="window.location.reload()" class="px-8 py-3 bg-red-600 hover:bg-red-700 font-bold rounded-full transition-all">
+                        REPLAY SEQUENCE
+                    </button>
+                </div>
+            </template>
+        </main>
+
+        <footer class="flex justify-between items-end">
+            <div class="grid grid-cols-3 gap-8">
+                <div class="flex flex-col gap-2 transition-all duration-500" :class="phase === 'MORE' ? 'opacity-100 scale-105' : 'opacity-30'">
+                    <div class="h-0.5 w-16 bg-red-600"></div>
+                    <span class="text-[10px] font-bold">MORE</span>
+                </div>
+                <div class="flex flex-col gap-2 transition-all duration-500" :class="phase === 'BETTER' ? 'opacity-100 scale-105' : 'opacity-30'">
+                    <div class="h-0.5 w-16 bg-red-500"></div>
+                    <span class="text-[10px] font-bold">BETTER</span>
+                </div>
+                <div class="flex flex-col gap-2 transition-all duration-500" :class="phase === 'LESS' ? 'opacity-100 scale-105' : 'opacity-30'">
+                    <div class="h-0.5 w-16 bg-red-400"></div>
+                    <span class="text-[10px] font-bold">LESS</span>
+                </div>
+            </div>
+            <div class="text-[10px] text-gray-500 font-mono">
+                <span>CORE_TEMP: 42°C | VER: 8.4.0</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function reflectionSystem() {
+            return {
+                timer: 0,
+                phase: 'INTRO',
+                progress: 0,
+                skills: [
+                    { label: 'Leadership', val: 82 },
+                    { label: 'Project Mgmt', val: 94 },
+                    { label: 'Digital Tools', val: 78 }
+                ],
+                startTimer() {
+                    setInterval(() => {
+                        this.timer = this.timer >= 45 ? 45 : this.timer + 0.1;
+                        this.updatePhase();
+                        // Re-process icons whenever phase changes
+                        lucide.createIcons();
+                    }, 100);
+                },
+                updatePhase() {
+                    if (this.timer < 3) {
+                        this.phase = 'INTRO';
+                    } else if (this.timer < 15) {
+                        this.phase = 'MORE';
+                        this.progress = (this.timer - 3) / 12;
+                    } else if (this.timer < 28) {
+                        this.phase = 'BETTER';
+                        this.progress = (this.timer - 15) / 13;
+                    } else if (this.timer < 40) {
+                        this.phase = 'LESS';
+                        this.progress = (this.timer - 28) / 12;
+                    } else {
+                        this.phase = 'SYNTHESIS';
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

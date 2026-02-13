@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Directors - AI System Core</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --core-red: #ff1a1a;
+            --glow-red: rgba(255, 26, 26, 0.6);
+            --bg-black: #050505;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Neural Background Canvas */
+        #neuralCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Foreground Content */
+        .stage {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* 0-7s: Phase 1 - Title & Loading */
+        #phase-loading {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+        }
+
+        .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px var(--glow-red);
+            filter: drop-shadow(0 0 5px white);
+        }
+
+        .loading-container {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loading-bar-outer {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-bar-inner {
+            height: 100%;
+            width: 0%;
+            background: var(--core-red);
+            box-shadow: 0 0 15px var(--core-red);
+        }
+
+        .loading-stats {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--core-red);
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        /* 8-12s: Phase 2 - Directors Reveal */
+        #phase-directors {
+            position: absolute;
+            display: none;
+            width: 100%;
+            justify-content: center;
+            gap: 60px;
+            opacity: 0;
+        }
+
+        .director-card {
+            width: 400px;
+            position: relative;
+        }
+
+        .image-frame {
+            width: 100%;
+            aspect-ratio: 4/5;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 26, 26, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            margin-bottom: 1.5rem;
+            box-shadow: inset 0 0 30px rgba(255, 26, 26, 0.1);
+        }
+
+        /* Placeholder / Frame glow */
+        .image-frame::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 1px solid transparent;
+            background: linear-gradient(45deg, var(--core-red), transparent, var(--core-red)) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            opacity: 0.5;
+        }
+
+        /* Futuristic Portrait Placeholder */
+        .portrait-placeholder {
+            width: 85%;
+            height: 85%;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.2);
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .info-panel {
+            text-align: left;
+            border-left: 3px solid var(--core-red);
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .director-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px var(--glow-red);
+        }
+
+        .director-role {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.4;
+            letter-spacing: 1px;
+        }
+
+        /* HUD & Particles Overlay */
+        .hud-scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.1;
+        }
+
+        .transition-sweep {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--core-red), transparent);
+            opacity: 0.3;
+            z-index: 50;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="neuralCanvas"></canvas>
+    <div class="hud-scanline"></div>
+    <div class="transition-sweep" id="sweep"></div>
+
+    <main class="stage">
+        <!-- PHASE 1: LOADING -->
+        <div id="phase-loading">
+            <h1 class="main-title">BACKEND DIRECTORS</h1>
+            <div class="loading-container">
+                <div class="loading-bar-outer">
+                    <div class="loading-bar-inner" id="progress-bar"></div>
+                </div>
+                <div class="loading-stats">SYSTEM INITIALIZING: <span id="percent">0</span>%</div>
+            </div>
+        </div>
+
+        <!-- PHASE 2: REVEAL -->
+        <div id="phase-directors">
+            <!-- Diane Borres -->
+            <div class="director-card" id="card-1">
+                <div class="image-frame">
+                    <img class="portrait-placeholder" src="./image/MS_DIANE.png" alt="Diane Borres Portrait">
+                </div>
+                <div class="info-panel">
+                    <h2 class="director-name">Diane Borres</h2>
+                    <p class="director-role">Chief Finance Officer,<br>IT & Admin Director</p>
+                </div>
+            </div>
+
+            <!-- Atty Madelyn Sarmiento -->
+            <div class="director-card" id="card-2">
+                <div class="image-frame">
+                    <img class="portrait-placeholder" src="./image/ATTY.jpeg" alt="Atty Madelyn Sarmiento Portrait">
+                </div>
+                <div class="info-panel">
+                    <h2 class="director-name">Atty Madelyn Sarmiento</h2>
+                    <p class="director-role">HR and Legal &<br>Compliance Director</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * NEURAL NETWORK BACKGROUND SCRIPT
+         */
+        const canvas = document.getElementById('neuralCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 1.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 26, 26, 0.5)';
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 80; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateBg() {
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.2)'; // Faint trail
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw connections
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(255, 26, 26, ${0.1 * (1 - dist / 150)})`;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateBg);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        initParticles();
+        animateBg();
+
+        /**
+         * CINEMATIC SEQUENCE ANIMATION
+         */
+        const tl = gsap.timeline();
+
+        // 0-3s: Title Reveal
+        tl.to("#phase-loading", { opacity: 1, duration: 1.5, ease: "power2.out" }, 0.5);
+        tl.from(".main-title", { 
+            scale: 0.95, 
+            letterSpacing: "1rem", 
+            duration: 3, 
+            ease: "power1.out" 
+        }, 0);
+
+        // 3-7s: Loading sequence
+        const progressObj = { value: 0 };
+        tl.to(progressObj, {
+            value: 100,
+            duration: 4,
+            ease: "power1.inOut",
+            onUpdate: () => {
+                const p = Math.floor(progressObj.value);
+                document.getElementById('percent').innerText = p;
+                document.getElementById('progress-bar').style.width = p + '%';
+            }
+        }, 3);
+
+        // Loading bar pulses
+        tl.to("#progress-bar", { boxShadow: "0 0 30px #ff1a1a", duration: 0.2, repeat: 3, yoyo: true }, 6.5);
+
+        // 7-8s: Transition
+        tl.to("#phase-loading", { opacity: 0, duration: 0.5, ease: "power2.in" }, 7.5);
+        tl.to("#sweep", { left: "100%", duration: 1, ease: "none" }, 7.2);
+
+        // 8-12s: Directors Reveal
+        tl.set("#phase-directors", { display: 'flex' }, 8);
+        tl.to("#phase-directors", { opacity: 1, duration: 1 }, 8.2);
+        
+        tl.from("#card-1", { x: -50, opacity: 0, duration: 1.5, ease: "power3.out" }, 8.5);
+        tl.from("#card-2", { x: 50, opacity: 0, duration: 1.5, ease: "power3.out" }, 8.7);
+
+        // Subtle floating depth effect
+        tl.to(".director-card", {
+            y: -15,
+            duration: 2,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            stagger: 0.3
+        }, 9);
+
+        // Continuous light sweep on text
+        gsap.to(".main-title", {
+            background: "linear-gradient(90deg, #fff, #ff1a1a, #fff)",
+            backgroundSize: "200% 100%",
+            webkitBackgroundClip: "text",
+            backgroundClip: "text",
+            duration: 3,
+            repeat: -1,
+            ease: "linear"
+        });
+
+    </script>
+</body>
+</html>

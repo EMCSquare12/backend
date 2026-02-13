@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Module - Quick Closing Cut</title>
+    <style>
+        :root {
+            --glow-red: rgba(255, 30, 30, 0.6);
+            --core-red: #ff3b3b;
+            --bg-black: #050505;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-black);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Cinematic Container */
+        #viewport {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 Aspect Ratio */
+            max-height: 100vh;
+            max-width: 177.78vh;
+            background: radial-gradient(circle at center, #1a0505 0%, #050505 100%);
+            overflow: hidden;
+            box-shadow: 0 0 100px rgba(0,0,0,1) inset;
+        }
+
+        /* Scan lines effect */
+        #viewport::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.1) 50%
+            ), linear-gradient(
+                90deg, 
+                rgba(255, 0, 0, 0.03), 
+                rgba(0, 255, 0, 0.01), 
+                rgba(0, 0, 255, 0.03)
+            );
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Neural Core Canvas */
+        #neuralCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* UI Overlays */
+        .overlay-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .text-group {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 1.5s ease-out, transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .admin-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            letter-spacing: 0.8rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 15px var(--glow-red));
+            position: relative;
+        }
+
+        .admin-title::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-25deg);
+        }
+
+        .admin-subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.5rem;
+            color: #ccc;
+            opacity: 0;
+            transition: opacity 1.5s ease-out 1s;
+        }
+
+        .final-callout {
+            position: absolute;
+            bottom: 20%;
+            opacity: 0;
+            transition: opacity 2s ease-out, transform 2s ease-out;
+            transform: translateY(20px);
+        }
+
+        .ready-text {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtext {
+            font-size: 0.9rem;
+            color: #888;
+            letter-spacing: 0.1rem;
+        }
+
+        /* Phase Animations */
+        .active .text-group {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .active .admin-subtitle {
+            opacity: 1;
+        }
+
+        .active .admin-title::after {
+            animation: sweep 3s infinite;
+        }
+
+        .active-final .final-callout {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes sweep {
+            0% { left: -100%; }
+            50% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        #black-out {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            opacity: 0;
+            z-index: 20;
+            pointer-events: none;
+            transition: opacity 2s ease-in;
+        }
+
+        .restart-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            cursor: pointer;
+            z-index: 30;
+            font-size: 12px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewport">
+        <canvas id="neuralCanvas"></canvas>
+        
+        <div class="overlay-layer">
+            <div class="text-group" id="mainText">
+                <div class="admin-title">Admin 2025</div>
+                <div class="admin-subtitle">STRUCTURED. STRATEGIC. STRONGER.</div>
+            </div>
+
+            <div class="final-callout" id="finalImpact">
+                <div class="ready-text">READY FOR WHAT’S NEXT.</div>
+                <div class="subtext">Smarter Systems. Stronger Team. Sustainable Growth.</div>
+            </div>
+        </div>
+
+        <div id="black-out"></div>
+    </div>
+
+    <button class="restart-btn" onclick="startSequence()">Replay Sequence</button>
+
+    <script>
+        const canvas = document.getElementById('neuralCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        let startTime = 0;
+        let coreIntensity = 1;
+        let coreConvergence = 0; // 0 is normal, 1 is converged
+        let bgDim = 0;
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2;
+                this.alpha = Math.random() * 0.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Neural pull
+                if (coreConvergence > 0) {
+                    const dx = width / 2 - this.x;
+                    const dy = height / 2 - this.y;
+                    this.x += dx * 0.01 * coreConvergence;
+                    this.y += dy * 0.01 * coreConvergence;
+                }
+
+                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 50, 50, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function resize() {
+            width = canvas.width = canvas.offsetWidth;
+            height = canvas.height = canvas.offsetHeight;
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function drawNeuralCore(time) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Pulse logic
+            const pulse = Math.sin(time * 0.002) * 0.1 + 0.9;
+            const baseRadius = 80 * pulse * coreIntensity;
+
+            // Background dimming overlay
+            if (bgDim > 0) {
+                ctx.fillStyle = `rgba(0,0,0, ${bgDim * 0.6})`;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // Glow
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, baseRadius * 3);
+            gradient.addColorStop(0, `rgba(255, 30, 30, ${0.4 * coreIntensity})`);
+            gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, baseRadius * 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Core
+            ctx.shadowBlur = 20 * coreIntensity;
+            ctx.shadowColor = 'rgba(255, 50, 50, 0.8)';
+            ctx.fillStyle = `rgba(255, 50, 50, ${0.8 * coreIntensity})`;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, baseRadius * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Neural Lines
+            ctx.strokeStyle = `rgba(255, 50, 50, ${0.2 * coreIntensity})`;
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2 + (time * 0.0002);
+                const x1 = centerX + Math.cos(angle) * (baseRadius * 0.8);
+                const y1 = centerY + Math.sin(angle) * (baseRadius * 0.8);
+                const x2 = centerX + Math.cos(angle) * (baseRadius * 2.5);
+                const y2 = centerY + Math.sin(angle) * (baseRadius * 2.5);
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+
+        function animate() {
+            const now = performance.now();
+            const elapsed = (now - startTime) / 1000;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Phase logic management
+            if (elapsed < 2) {
+                // SCENE CONTINUITY: Steady state
+                coreConvergence = 0;
+                coreIntensity = 1;
+            } 
+            else if (elapsed < 6) {
+                // FINAL STATEMENT BUILD
+                coreConvergence = Math.min(1, (elapsed - 2) / 2);
+                document.getElementById('mainText').parentElement.classList.add('active');
+            } 
+            else if (elapsed < 10) {
+                // FINAL IMPACT MOMENT
+                bgDim = Math.min(1, (elapsed - 6) / 2);
+                document.getElementById('finalImpact').parentElement.classList.add('active-final');
+                
+                // One confident pulse around 7 seconds
+                if (elapsed > 7.5 && elapsed < 8.5) {
+                    coreIntensity = 1.5 - Math.abs(8 - elapsed) * 0.5;
+                } else {
+                    coreIntensity = 1;
+                }
+            } 
+            else if (elapsed < 12) {
+                // END FRAME: Fade to black
+                coreIntensity = Math.max(0, 1 - (elapsed - 10) / 2);
+                document.getElementById('black-out').style.opacity = Math.min(1, (elapsed - 10.5) / 1.5);
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            drawNeuralCore(now);
+            requestAnimationFrame(animate);
+        }
+
+        function startSequence() {
+            startTime = performance.now();
+            // Reset UI states
+            document.getElementById('mainText').parentElement.classList.remove('active');
+            document.getElementById('finalImpact').parentElement.classList.remove('active-final');
+            document.getElementById('black-out').style.opacity = 0;
+            bgDim = 0;
+            coreIntensity = 1;
+            coreConvergence = 0;
+        }
+
+        window.onload = () => {
+            resize();
+            window.addEventListener('resize', resize);
+            startSequence();
+            animate();
+        };
+    </script>
+</body>
+</html>

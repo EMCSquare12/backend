@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin 2025 Innovations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        
+        body {
+            background-color: #050000;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            height: 100vh;
+        }
+
+        /* Background Visuals */
+        .neural-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: rgba(127, 29, 29, 0.15);
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            transition: all 2s ease;
+        }
+
+        .scan-lines {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 4px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Panel States */
+        .panel-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 15, 15, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-card.revealed {
+            opacity: 0.2;
+            transform: translateY(0);
+        }
+
+        .panel-card.active {
+            opacity: 1;
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(45, 0, 0, 0.3);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+        }
+
+        /* Step Transitions */
+        .step-container {
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .hidden-step {
+            display: none !important;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        /* Mini Graph Animations */
+        @keyframes scan {
+            from { top: -10%; }
+            to { top: 110%; }
+        }
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 10px red;
+            animation: scan 2s linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scan-lines"></div>
+    <div class="neural-core" id="core"></div>
+
+    <div class="relative z-20 w-full h-screen max-w-6xl mx-auto px-8 flex flex-col py-12">
+        
+        <div id="step-0" class="step-container flex-1 flex flex-col items-center justify-center text-center">
+            <div class="mb-4 text-red-500 tracking-[0.5em] text-xs font-bold uppercase">
+                Sequence 06 // Systems Innovation
+            </div>
+            <h1 class="text-7xl font-black tracking-tighter mb-2 text-white">
+                ADMIN 2025 <span class="text-red-600">KEY INNOVATIONS</span>
+            </h1>
+            <p class="text-xl text-gray-400 font-light tracking-widest uppercase">
+                Driving Smarter Operations
+            </p>
+            <div class="h-px bg-gradient-to-r from-transparent via-red-600 to-transparent mt-10 w-96"></div>
+        </div>
+
+        <div id="dashboard" class="step-container hidden-step flex-col h-full opacity-0">
+            <div class="flex justify-between items-end mb-8 border-b border-white/10 pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
+                        <i data-lucide="activity" class="w-6 h-6 text-red-600"></i>
+                        ADMIN 2025 INNOVATION DASHBOARD
+                    </h2>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Operational Evolution Phase 2.4</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] text-gray-500 uppercase font-bold">System Health</div>
+                    <div class="text-red-500 font-mono text-xl">OPTIMAL // 98.4%</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6 flex-1 mb-8">
+                <div class="panel-card p-5 rounded-xl flex flex-col" id="p1">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="zap" class="w-5 h-5 text-red-500"></i>
+                        <h3 class="text-xs font-bold tracking-wider">ZAP TECHNOLOGY</h3>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mb-6 flex-1">Streamlined errands and supply transfers.</p>
+                    <div class="h-12 bg-black/40 rounded flex items-center justify-center font-bold text-red-500 text-xl">40% ↓</div>
+                </div>
+
+                <div class="panel-card p-5 rounded-xl flex flex-col" id="p2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="cpu" class="w-5 h-5 text-red-500"></i>
+                        <h3 class="text-xs font-bold tracking-wider">AI INTEGRATION</h3>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mb-6 flex-1">Optimized repetitive admin tasks.</p>
+                    <div class="h-12 bg-black/40 rounded flex items-center justify-center font-bold text-red-400 text-xl">+85%</div>
+                </div>
+
+                <div class="panel-card p-5 rounded-xl flex flex-col" id="p3">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="settings" class="w-5 h-5 text-red-500"></i>
+                        <h3 class="text-xs font-bold tracking-wider">UPGRADED EQUIPMENT</h3>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mb-6 flex-1">Enhanced operational efficiency.</p>
+                    <div class="h-12 bg-black/40 rounded flex items-center px-4">
+                        <div class="w-full h-1 bg-red-900 rounded-full"><div class="w-3/4 h-full bg-red-500"></div></div>
+                    </div>
+                </div>
+
+                <div class="panel-card p-5 rounded-xl flex flex-col" id="p4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="package" class="w-5 h-5 text-red-500"></i>
+                        <h3 class="text-xs font-bold tracking-wider">WAREHOUSE (WMS)</h3>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mb-6 flex-1">Systematic tracking and reporting.</p>
+                    <div class="h-12 bg-black/40 rounded relative overflow-hidden flex items-center justify-center text-green-400 font-bold">
+                        <div class="scanner-line"></div>
+                        99.9% ACCURACY
+                    </div>
+                </div>
+
+                <div class="panel-card p-5 rounded-xl flex flex-col" id="p5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="globe" class="w-5 h-5 text-red-500"></i>
+                        <h3 class="text-xs font-bold tracking-wider">SUPPLIER NETWORK</h3>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mb-6 flex-1">Built new global partnerships.</p>
+                    <div class="h-12 bg-black/40 rounded flex items-center justify-center">
+                        <i data-lucide="globe-2" class="w-6 h-6 text-red-500/40"></i>
+                    </div>
+                </div>
+
+                <div class="panel-card p-5 rounded-xl flex flex-col" id="p6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="graduation-cap" class="w-5 h-5 text-red-500"></i>
+                        <h3 class="text-xs font-bold tracking-wider">UPSKILLING</h3>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mb-6 flex-1">Targeted leadership training.</p>
+                    <div class="h-12 bg-black/40 rounded flex flex-col justify-center px-4 gap-1">
+                        <div class="h-1 bg-red-500 w-full"></div>
+                        <div class="h-1 bg-red-500 w-4/5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step-7" class="step-container hidden-step fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-2xl opacity-0">
+            <div class="text-center">
+                <h2 class="text-6xl font-black mb-4">INNOVATION <span class="text-red-600">2025</span></h2>
+                <div class="flex gap-8 justify-center text-2xl font-bold text-gray-400">
+                    <span>SMARTER</span><span>•</span><span>FASTER</span><span>•</span><span>READY</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-auto pt-8 flex items-center gap-4">
+            <div class="text-[10px] font-mono text-gray-500 tracking-widest">SYSTEM_SYNC</div>
+            <div class="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-red-600 w-0 transition-all duration-300"></div>
+            </div>
+            <div id="progress-text" class="text-[10px] font-mono text-gray-500 w-12 text-right">0%</div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const steps = [
+            { duration: 4000 }, // Intro
+            { duration: 5000 }, // Zap
+            { duration: 5000 }, // AI
+            { duration: 5000 }, // Tools
+            { duration: 5000 }, // WMS
+            { duration: 5000 }, // Supplier
+            { duration: 5000 }, // Upskill
+            { duration: 6000 }  // Synthesis
+        ];
+
+        const totalTime = steps.reduce((a, b) => a + b.duration, 0);
+        let start = Date.now();
+
+        function sync() {
+            const now = Date.now();
+            const elapsed = now - start;
+            const pct = Math.min((elapsed / totalTime) * 100, 100);
+            
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('progress-text').innerText = Math.round(pct) + '%';
+
+            // Logic for Step Switching
+            let currentStep = 0;
+            let acc = 0;
+            for(let i=0; i<steps.length; i++) {
+                acc += steps[i].duration;
+                if(elapsed < acc) {
+                    currentStep = i;
+                    break;
+                }
+                currentStep = 7;
+            }
+
+            // UI Manipulation
+            const intro = document.getElementById('step-0');
+            const dash = document.getElementById('dashboard');
+            const synth = document.getElementById('step-7');
+            const core = document.getElementById('core');
+
+            if (currentStep === 0) {
+                // Show Intro
+            } else if (currentStep >= 1 && currentStep <= 6) {
+                intro.classList.add('fade-out');
+                setTimeout(() => intro.classList.add('hidden-step'), 1000);
+                
+                dash.classList.remove('hidden-step');
+                setTimeout(() => dash.style.opacity = '1', 50);
+
+                // Handle Panels
+                for(let i=1; i<=6; i++) {
+                    const el = document.getElementById('p' + i);
+                    el.classList.add('revealed');
+                    if(i === currentStep) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
+                }
+            } else if (currentStep === 7) {
+                dash.classList.add('fade-out');
+                synth.classList.remove('hidden-step');
+                setTimeout(() => synth.style.opacity = '1', 50);
+                core.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                core.style.background = 'rgba(127, 29, 29, 0.4)';
+            }
+
+            if (pct < 100) requestAnimationFrame(sync);
+        }
+
+        requestAnimationFrame(sync);
+    </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI System Interface Intro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #020000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Cinematic Letterbox */
+        .letterbox {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 8vh;
+            background: black;
+            z-index: 50;
+            transition: transform 2s ease-in-out;
+        }
+        .letterbox-top { top: 0; }
+        .letterbox-bottom { bottom: 0; }
+
+        /* HUD Overlays */
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 2s ease-in;
+        }
+
+        .scanning-line {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 0, 0, 0.2), transparent);
+            top: -10%;
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+
+        .title-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 20;
+            opacity: 0;
+        }
+
+        .title-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .title-text::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: skewX(-25deg);
+        }
+
+        .title-reveal .title-text::after {
+            animation: sweep 2s ease-in-out forwards;
+            animation-delay: 1s;
+        }
+
+        @keyframes sweep {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .glitch-text {
+            font-size: 0.7rem;
+            font-family: monospace;
+            color: #ff4d4d;
+            opacity: 0.6;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        /* Core Interface Rings */
+        .core-ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            width: 400px;
+            height: 400px;
+            border: 1px solid rgba(255, 0, 0, 0.1);
+            border-radius: 50%;
+            z-index: 5;
+            opacity: 0;
+            transition: all 3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .core-ui.active {
+            opacity: 0.4;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .hex-frame {
+            position: absolute;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            animation: rotate-slow 20s linear infinite;
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="letterbox letterbox-top"></div>
+    <div class="letterbox letterbox-bottom"></div>
+
+    <div id="canvas-container"></div>
+
+    <div class="hud-overlay" id="hud">
+        <div class="scanning-line"></div>
+        <!-- Corner HUD Elements -->
+        <div class="absolute top-12 left-12 border-l border-t border-red-500/30 p-4">
+            <p class="text-[10px] text-red-500/50 uppercase tracking-[0.2em]">System Status: Online</p>
+            <p class="text-[10px] text-red-500/50 uppercase tracking-[0.2em]">Neural Core: Synchronized</p>
+        </div>
+        <div class="absolute bottom-12 right-12 border-r border-b border-red-500/30 p-4 text-right">
+            <p class="text-[10px] text-red-500/50 uppercase tracking-[0.2em]">Data Stream: 4.8 TB/s</p>
+            <p class="text-[10px] text-red-500/50 uppercase tracking-[0.2em]">Process ID: BE-2025-RECAP</p>
+        </div>
+    </div>
+
+    <div class="core-ui" id="core-ui">
+        <div class="hex-frame"></div>
+        <div class="absolute inset-4 border border-red-900/20 rounded-full animate-[ping_4s_ease-in-out_infinite]"></div>
+    </div>
+
+    <div class="title-container" id="title-reveal">
+        <h1 class="title-text">Backend 2025 Recap</h1>
+        <div class="glitch-text" id="status-text">INITIALIZING CORE NEURAL NETWORK...</div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, clock;
+        let particles, neuralLines, coreSphere;
+        let points = [];
+        let connections = [];
+
+        const POINT_COUNT = 150;
+        const MAX_DIST = 180;
+        const CORE_ACTIVE_TIME = 2000; // 2 sec
+        const TITLE_REVEAL_TIME = 6000; // 6 sec
+        const HOLD_TIME = 10000; // 10 sec
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.z = 400;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            // 1. Neural Particles
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(POINT_COUNT * 3);
+            const velocities = [];
+
+            for (let i = 0; i < POINT_COUNT; i++) {
+                const x = (Math.random() - 0.5) * 800;
+                const y = (Math.random() - 0.5) * 600;
+                const z = (Math.random() - 0.5) * 400;
+
+                positions[i * 3] = x;
+                positions[i * 3 + 1] = y;
+                positions[i * 3 + 2] = z;
+
+                velocities.push({
+                    x: (Math.random() - 0.5) * 0.5,
+                    y: (Math.random() - 0.5) * 0.5,
+                    z: (Math.random() - 0.5) * 0.5
+                });
+                
+                points.push(new THREE.Vector3(x, y, z));
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({
+                color: 0xff3333,
+                size: 2,
+                transparent: true,
+                opacity: 0
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            // 2. Neural Lines (dynamic)
+            const lineGeometry = new THREE.BufferGeometry();
+            const lineMaterial = new THREE.LineBasicMaterial({
+                color: 0x880000,
+                transparent: true,
+                opacity: 0
+            });
+            neuralLines = new THREE.LineSegments(lineGeometry, lineMaterial);
+            scene.add(neuralLines);
+
+            // 3. Central Core
+            const coreGeom = new THREE.SphereGeometry(10, 32, 32);
+            const coreMat = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 0
+            });
+            coreSphere = new THREE.Mesh(coreGeom, coreMat);
+            scene.add(coreSphere);
+
+            // Ambient Light
+            const ambient = new THREE.AmbientLight(0x220000);
+            scene.add(ambient);
+
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate();
+            startSequence();
+        }
+
+        function startSequence() {
+            const hud = document.getElementById('hud');
+            const coreUI = document.getElementById('core-ui');
+            const titleReveal = document.getElementById('title-reveal');
+            const statusText = document.getElementById('status-text');
+
+            // 0-2s: Fade In & Boot
+            setTimeout(() => {
+                hud.style.opacity = '1';
+                particles.material.opacity = 0.6;
+                neuralLines.material.opacity = 0.2;
+            }, 500);
+
+            // 2-6s: Activation
+            setTimeout(() => {
+                coreUI.classList.add('active');
+                coreSphere.material.opacity = 0.8;
+                statusText.innerText = "CORE SYNCHRONIZED. LOADING RECORDS...";
+            }, CORE_ACTIVE_TIME);
+
+            // 6-10s: Title Reveal
+            setTimeout(() => {
+                titleReveal.style.opacity = '1';
+                titleReveal.classList.add('title-reveal');
+                statusText.innerText = "ACCESS GRANTED. SYSTEM STABLE.";
+            }, TITLE_REVEAL_TIME);
+
+            // 10-12s: Fade Out
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 2s ease-in-out';
+                document.body.style.opacity = '0';
+            }, HOLD_TIME);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getElapsedTime();
+            const positions = particles.geometry.attributes.position.array;
+
+            const linePositions = [];
+            const time = delta * 0.1;
+
+            // Update particle positions
+            for (let i = 0; i < POINT_COUNT; i++) {
+                // Gentle drift
+                positions[i * 3] += Math.sin(time + i) * 0.2;
+                positions[i * 3 + 1] += Math.cos(time + i) * 0.2;
+                
+                // Pull toward center if active
+                if (delta > 2) {
+                    positions[i * 3] *= 0.998;
+                    positions[i * 3 + 1] *= 0.998;
+                    positions[i * 3 + 2] *= 0.998;
+                }
+
+                points[i].set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+            }
+
+            // Create connections
+            for (let i = 0; i < POINT_COUNT; i++) {
+                for (let j = i + 1; j < POINT_COUNT; j++) {
+                    const dist = points[i].distanceTo(points[j]);
+                    if (dist < MAX_DIST) {
+                        linePositions.push(points[i].x, points[i].y, points[i].z);
+                        linePositions.push(points[j].x, points[j].y, points[j].z);
+                    }
+                }
+            }
+
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            neuralLines.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+            
+            // Pulse the core
+            if (delta > 2) {
+                const pulse = 1 + Math.sin(delta * 4) * 0.1;
+                coreSphere.scale.set(pulse, pulse, pulse);
+            }
+
+            // Subtle camera movement
+            camera.position.x = Math.sin(delta * 0.2) * 50;
+            camera.position.y = Math.cos(delta * 0.2) * 30;
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
